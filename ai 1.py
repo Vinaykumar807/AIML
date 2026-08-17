@@ -1,45 +1,52 @@
-from queue import PriorityQueue
+from collections import deque
 
-def best_first_search(graph, start, target, heuristics):
+# Breadth First Search (BFS)
+def bfs(graph, start):
     visited = set()
-    pq = PriorityQueue()
-
-    pq.put((heuristics[start], start, [start]))
+    queue = deque([start])
     visited.add(start)
+    order = []
 
-    while not pq.empty():
-        h, node, path = pq.get()
+    while queue:
+        vertex = queue.popleft()
+        order.append(vertex)
 
-        if node == target:
-            return path, h
+        for neighbor in graph.get(vertex, []):
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append(neighbor)
 
-        for neighbour in graph.get(node, []):
-            if neighbour not in visited:
-                visited.add(neighbour)
-                pq.put((heuristics[neighbour], neighbour, path + [neighbour]))
-
-    return None, None
+    return order
 
 
-# Example usage
-if __name__ == "__main__":
-    graph = {
-        'A': ['B', 'C'],
-        'B': ['D', 'E'],
-        'C': ['F'],
-        'D': [],
-        'E': [],
-        'F': []
-    }
+# Depth First Search (DFS)
+def dfs(graph, start, visited=None, order=None):
+    if visited is None:
+        visited = set()
 
-    heuristics = {
-        'A': 10,
-        'B': 20,
-        'C': 5,
-        'D': 6,
-        'E': 4,
-        'F': 0
-    }
+    if order is None:
+        order = []
 
-    path, cost = best_first_search(graph, 'A', 'F', heuristics)
-    print(f"path found by Best-first search: {path} with cost: {cost}")
+    visited.add(start)
+    order.append(start)
+
+    for neighbor in graph.get(start, []):
+        if neighbor not in visited:
+            dfs(graph, neighbor, visited, order)
+
+    return order
+
+
+# Graph represented as an adjacency list
+graph = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D', 'E'],
+    'C': ['A', 'F'],
+    'D': ['B'],
+    'E': ['B', 'F'],
+    'F': ['C', 'E']
+}
+
+# Driver code
+print("BFS Traversal starting from 'A':", bfs(graph, 'A'))
+print("DFS Traversal starting from 'A':", dfs(graph, 'A'))
